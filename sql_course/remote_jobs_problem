@@ -1,0 +1,54 @@
+
+/* 
+find the count of the number of remote job postings per skill 
+    - display the top 5 skills by their demand in remote jobs 
+    - include the skill id, name and the count of postings requiring the skill  
+*/
+
+WITH remote_jobs AS (
+    
+    SELECT
+        job_postings_fact.job_id,
+        skills_job_dim.skill_id,
+        skiLls_dim.skills 
+    FROM 
+        job_postings_fact
+    LEFT JOIN skills_job_dim ON
+        job_postings_fact.job_id = skills_job_dim.job_id
+    left JOIN skills_dim ON
+        skills_job_dim.skill_id = skills_dim.skill_id
+    WHERE 
+        --job_location = 'Anywhere' or
+        job_work_from_home = true
+)
+SELECT
+    remote_jobs.skills,
+    COUNT(job_id) AS count
+FROM 
+    remote_jobs
+GROUP by 
+    remote_jobs.skills 
+ORDER BY count DESC
+LIMIT 5; 
+
+--OR
+
+WITH job_remote AS(
+    SELECT     
+        skills_job_dim.skill_id,
+        COUNT(*) AS count
+    FROM job_postings_fact
+    JOIN skills_job_dim ON
+        job_postings_fact.job_id = skills_job_dim.job_id
+    WHERE job_work_from_home = true
+    GROUP BY skills_job_dim.skill_id
+)
+SELECT
+    skills_dim.skills,
+    job_remote.skill_id,
+    count
+FROM job_remote
+JOIN skills_dim ON
+    job_remote.skill_id = skills_dim.skill_id
+ORDER BY count DESC
+LIMIT 5;
