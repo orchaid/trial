@@ -1,0 +1,74 @@
+
+WITH most_wanted_skills AS
+(
+    SELECT
+        --skills,
+        skills_job_dim.skill_id,
+        COUNT(skills_job_dim.job_id) count
+    FROM job_postings_fact
+    JOIN skills_job_dim  ON
+            job_postings_fact.job_id = skills_job_dim.job_id
+    JOIN skills_dim ON
+            skills_dim.skill_id = skills_job_dim.skill_id
+    WHERE job_location = 'Anywhere' AND job_title_short = 'Data Analyst'
+    GROUP BY skills_job_dim.skill_id--,skills_dim.skills
+
+) , most_paying_skills AS
+(
+    SELECT 
+            ROUND (AVG (salary_year_avg)) AS average_salary,
+            --skills_dim.skills,
+            skills_dim.skill_id
+    FROM skills_dim
+    JOIN skills_job_dim ON
+            skills_dim.skill_id = skills_job_dim.skill_id
+    JOIN job_postings_fact ON
+            skills_job_dim.job_id = job_postings_fact.job_id
+    WHERE 
+        salary_year_avg IS NOT NULL AND
+        job_title_short = 'Data Analyst' AND
+        job_location = 'Anywhere'
+    GROUP BY --skills_dim.skills,
+            skills_dim.skill_id
+) 
+SELECT 
+    most_paying_skills.skill_id,
+    --most_paying_skills.skills,
+    count,
+    average_salary
+FROM most_paying_skills
+INNER JOIN most_wanted_skills ON 
+    most_paying_skills.skill_id = most_wanted_skills.skill_id
+ORDER BY 
+    count DESC,
+    average_salary DESC
+LIMIT 25;
+
+
+
+
+--or much simpler
+SELECT
+    --skills_job_dim.skill_id,
+    skills,
+    COUNT(job_postings_fact.job_id) count,
+    ROUND(AVG (salary_year_avg)) AS average_sal
+FROM skills_dim
+JOIN skills_job_dim ON
+    skills_dim.skill_id = skills_job_dim.skill_id
+JOIN job_postings_fact ON
+    skills_job_dim.job_id = job_postings_fact.job_id
+WHERE 
+    job_location = 'Anywhere' AND
+    job_title_short = 'Data Analyst' AND
+    salary_year_avg IS NOT NULL
+GROUP BY skills--,skills_job_dim.skill_id
+HAVING COUNT(job_postings_fact.job_id) > 10
+ORDER BY 
+    average_sal DESC
+LIMIT 25
+
+
+
+
+

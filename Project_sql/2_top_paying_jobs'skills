@@ -1,0 +1,48 @@
+
+
+WITH top_paying_jobs AS 
+(
+    SELECT 
+        job_postings_fact.job_id,
+        
+        job_title_short,
+        job_title,
+        salary_year_avg AS salary,
+        name AS company_name
+    FROM job_postings_fact
+    LEFT JOIN company_dim ON
+        company_dim.company_id = job_postings_fact.company_id
+    
+    WHERE 
+        job_title_short = 'Data Analyst' AND
+        job_location = 'Anywhere' AND 
+        salary_year_avg IS NOT NULL
+    ORDER BY salary DESC
+    LIMIT 10
+)
+SELECT
+    job_title,
+    skills,
+    salary,
+    company_name
+FROM top_paying_jobs
+LEFT JOIN skills_job_dim ON
+        skills_job_dim.job_id = top_paying_jobs.job_id
+JOIN skills_dim ON
+    skills_job_dim.skill_id = skills_dim.skill_id
+/*
+The top 10 most in-demand skills across all roles are:
+
+1. SQL is leading with  (8 mentions)
+2. Python follows closely with (7 mentions)
+3. Tableau is highly sought after (6 mentions)
+4. R (4 mentions)
+5. Snowflake (3 mentions)
+6. Pandas (3 mentions)
+7. Excel (3 mentions)
+8. Azure (2 mentions)
+9. Bitbucket (2 mentions)
+10. Go (2 mentions)
+
+SQL and Python are the most frequently required skills
+*/

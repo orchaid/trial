@@ -1,0 +1,39 @@
+SELECT 
+    ROUND (AVG (salary_year_avg)) AS average_salary ,
+    --salary_year_avg AS average_salary,
+    skills
+    --job_title_short
+FROM
+    (SELECT 
+        skills_dim.skills,
+        skills_job_dim.job_id
+    FROM skills_dim
+    JOIN skills_job_dim ON
+        skills_dim.skill_id = skills_job_dim.skill_id
+    ) AS skills_job_id
+JOIN job_postings_fact ON
+    skills_job_id.job_id = job_postings_fact.job_id
+WHERE salary_year_avg IS NOT NULL AND
+    job_title_short = 'Data Analyst' AND
+    job_location = 'Anywhere'
+GROUP BY skills
+ORDER BY average_salary DESC
+LIMIT 25;
+
+/*
+Here are the insights condensed into 4 bullet points:
+
+- Specialized Tools Dominate: High-paying skills like PySpark ($208,172), Databricks, and Pandas
+ show the importance of big data frameworks and data manipulation libraries for data analyst roles.
+
+- Cloud & Infrastructure Skills: Expertise in Kubernetes ($132,500), GCP ($122,500), and Jenkins 
+ highlights the growing demand for cloud and workflow automation skills.
+
+- AI & Machine Learning Platforms: Tools like Watson ($160,515), DataRobot ($155,486), and Scikit-learn
+ reflect the integration of advanced analytics and machine learning in data analyst roles.
+
+- Database and Programming Skills: Knowledge of PostgreSQL ($123,879), Scala ($124,903), and Elasticsearch ($145,000) remains essential,
+ showcasing the need for both database management and coding expertise.
+
+*/
+

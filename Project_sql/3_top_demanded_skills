@@ -1,0 +1,39 @@
+--in-demand skills for data analyst
+SELECT 
+    job_title_short,
+    skills,
+    type,
+    COUNT(skills) count
+FROM 
+    (
+    SELECT
+        job_postings_fact.job_title_short,
+        job_location,
+        skills,
+        type
+    FROM skills_dim
+    JOIN skills_job_dim ON
+        skills_dim.skill_id = skills_job_dim.skill_id
+    JOIN job_postings_fact ON
+        skills_job_dim.job_id = job_postings_fact.job_id
+    )
+WHERE job_location = 'Anywhere' AND job_title_short = 'Data Analyst'
+GROUP BY skills,type,job_title_short
+ORDER BY count DESC
+LIMIT 5;
+
+--or
+SELECT
+    skills,
+    COUNT(job_postings_fact.job_id) count
+FROM skills_dim
+    JOIN skills_job_dim ON
+        skills_dim.skill_id = skills_job_dim.skill_id
+    JOIN job_postings_fact ON
+        skills_job_dim.job_id = job_postings_fact.job_id
+WHERE job_location = 'Anywhere' AND job_title_short = 'Data Analyst'
+GROUP BY skills
+ORDER BY count DESC
+LIMIT 5;
+
+
